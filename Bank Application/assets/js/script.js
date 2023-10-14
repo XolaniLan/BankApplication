@@ -67,19 +67,20 @@ const currencies = new Map([
   ['GBP', 'Pound sterling'],
 ]);
 
-// const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
-const displayMovements = function (movements) {
+const displayMovements = function (movements, sort = false) {
   containerMovements.innerHTML = '';
 
-  movements.forEach((mov, i) => {
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach((mov, i) => {
     const type = mov > 0 ? 'withdrawal' : 'deposit';
     const html = `
         <div class="movements__row">
-          <div class="movements__type movements__type--${type}">${
-      i + 1
-    } ${type}</div>
+          <div class="movements__type movements__type--${type}">${i + 1
+      } ${type}</div>
           <div class="movements__value">R${mov}</div>
         </div> 
     `;
@@ -88,11 +89,11 @@ const displayMovements = function (movements) {
   });
 };
 
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce((acc, mov) => {
+const calcDisplayBalance = function (acc) {
+  acc.balance = acc.movements.reduce((acc, mov) => {
     return acc + mov;
   }, 0);
-  labelBalance.textContent = `R${balance}`;
+  labelBalance.textContent = `R${acc.balance}`;
 };
 
 const calcDisplaySummary = function (acc) {
@@ -130,6 +131,17 @@ const createUsernames = function (accs) {
 
 createUsernames(accounts);
 
+const updateUI = function (acc) {
+  // Display movements
+  displayMovements(acc.movements);
+
+  // Display balance
+  calcDisplayBalance(acc);
+
+  // Display summary
+  calcDisplaySummary(acc);
+};
+
 let currentAccount;
 
 btnLogin.addEventListener('click', function (e) {
@@ -143,9 +155,8 @@ btnLogin.addEventListener('click', function (e) {
 
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
     // Display UI and Login Message
-    labelWelcome.textContent = `Welcome back, ${
-      currentAccount.owner.split(' ')[0]
-    }`;
+    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]
+      }`;
 
     containerApp.style.opacity = 100;
 
@@ -153,13 +164,65 @@ btnLogin.addEventListener('click', function (e) {
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
 
-    // Display movements
-    displayMovements(currentAccount.movements);
-
-    // Display balance
-    calcDisplayBalance(currentAccount.movements);
-
-    // Display summary
-    calcDisplaySummary(currentAccount);
+    // Update User Interface
+    updateUI(currentAccount);
   }
+});
+
+btnTransfer.addEventListener('click', function (e) {
+  e.preventDefault();
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(acc => acc.username === inputTransferTo.value);
+
+  inputTransferAmount.value = inputTransferTo.value = '';
+
+  if (amount > 0 && receiverAcc
+    && currentAccount.balance >= amount
+    && receiverAcc?.username !== currentAccount.username) {
+
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+
+    // Update User Interface
+    updateUI(currentAccount);
+  }
+});
+
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  const amount = Number(inputLoanAmount.value);
+  const interestAmtCheck = currentAccount.movements.some((mov) => {
+    return mov >= amount * 0.1;
+  });
+
+  if (amount > 0 && interestAmtCheck) {
+    // Add Movement
+    currentAccount.movements.push(amount);
+
+    // Update UI
+    updateUI(currentAccount);
+  }
+
+  // Clear the input field
+  inputLoanAmount.value = '';
+});
+
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+  // Check if the user name and pin is correct
+  if (inputCloseUsername.value === currentAccount.username &&
+    Number(inputClosePin.value) && currentAccount.pin) {
+
+    const index = accounts.findIndex((acc) => acc.username === inputCloseUsername.value);
+    // Delete Account
+    accounts.splice(index, 1);
+
+    // Hide the User Interface
+    containerApp.style.opacity = 0;
+
+  }
+
+  // Clear the fields
+  inputCloseUsername.value = inputClosePin.value = '';
 });

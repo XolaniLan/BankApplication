@@ -2,7 +2,7 @@
 
 // Data
 const account1 = {
-	owner: 'Jonas Schmedtmann',
+	owner: 'Xolani Shongwe',
 	movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
 	interestRate: 1.2, // %
 	pin: 1111,
@@ -22,7 +22,7 @@ const account1 = {
 };
 
 const account2 = {
-	owner: 'Jessica Davis',
+	owner: 'Sbusiso Dlamini',
 	movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
 	interestRate: 1.5,
 	pin: 2222,

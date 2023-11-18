@@ -13,7 +13,7 @@ The Bank Application is a web-based platform developed using JavaScript, HTML, a
 
 ## Setup
 
-1. **Clone Repository**: `git clone [repository_url]`
+1. **Clone Repository**: `git clone [(https://github.com/XolaniLan/BankApplication.git)]`
 2. **Navigate to Directory**: `cd bank-application`
 3. **Open index.html in a Browser**
 
